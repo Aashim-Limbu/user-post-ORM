@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { RequestHandler } from "express";
 const prisma = new PrismaClient();
-const insertUser: RequestHandler = async (req, res, next) => {
+export const insertUser: RequestHandler = async (req, res, next) => {
 	try {
 		const user = await prisma.user.create({
 			data: req.body,
@@ -18,7 +18,7 @@ const insertUser: RequestHandler = async (req, res, next) => {
 		next(error);
 	}
 };
-const readUser: RequestHandler = async (req, res, next) => {
+export const readUser: RequestHandler = async (req, res, next) => {
 	try {
 		const id = req.params.id;
 		const user = await prisma.user.findUnique({
@@ -37,7 +37,19 @@ const readUser: RequestHandler = async (req, res, next) => {
 		next("Sorry cannot find the user");
 	}
 };
-const updateUser: RequestHandler = async (req, res, next) => {
+export const getAllUser: RequestHandler = async (req, res, next) => {
+	try {
+		const users = await prisma.user.findMany();
+		if (!users) return next("User failed to load");
+		res.status(200).json({
+			status: "success",
+			data: users,
+		});
+	} catch (error) {
+		next("Sorry cannot get the user");
+	}
+};
+export const updateUser: RequestHandler = async (req, res, next) => {
 	try {
 		const id = req.params.id;
 		const user = await prisma.user.update({
@@ -55,7 +67,7 @@ const updateUser: RequestHandler = async (req, res, next) => {
 		next(`Sorry can't update the user ${error}`);
 	}
 };
-const deleteUser: RequestHandler = async (req, res, next) => {
+export const deleteUser: RequestHandler = async (req, res, next) => {
 	const id = req.params.id;
 	try {
 		const user = await prisma.user.delete({
@@ -74,10 +86,3 @@ const deleteUser: RequestHandler = async (req, res, next) => {
 		next(`Sorry Unable to delete the user with id ${id}`);
 	}
 };
-const userController = {
-	insertUser,
-	readUser,
-	updateUser,
-	deleteUser,
-};
-export default userController;
